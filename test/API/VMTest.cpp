@@ -28,11 +28,35 @@
 #ifndef QBDI_OS_WIN
 // Can be used to log failure on a test (usefull in subroutines)
 #define TEST_GUARD(T) ({    \
-    bool res = false;       \
+    bool res = false; \
     EXPECT_TRUE(res = (T)); \
     res; })
+#define TEST_GUARD_EQ(T1, T2) ({    \
+    EXPECT_EQ((T1), (T2)); \
+    (T1) == (T2); })
+#define TEST_GUARD_NE(T1, T2) ({    \
+    EXPECT_NE((T1), (T2)); \
+    (T1) != (T2); })
+#define TEST_GUARD_LT(T1, T2) ({    \
+    EXPECT_LT((T1), (T2)); \
+    (T1) < (T2); })
+#define TEST_GUARD_LE(T1, T2) ({    \
+    EXPECT_LE((T1), (T2)); \
+    (T1) <= (T2); })
+#define TEST_GUARD_GT(T1, T2) ({    \
+    EXPECT_GT((T1), (T2)); \
+    (T1) > (T2); })
+#define TEST_GUARD_GE(T1, T2) ({    \
+    EXPECT_GE((T1), (T2)); \
+    (T1) >= (T2); })
 #else
-#define TEST_GUARD
+#define TEST_GUARD(T) (T)
+#define TEST_GUARD_EQ(T1, T2) ((T1) == (T2))
+#define TEST_GUARD_NE(T1, T2) ((T1) != (T2))
+#define TEST_GUARD_LT(T1, T2) ((T1) <  (T2))
+#define TEST_GUARD_LE(T1, T2) ((T1) <= (T2))
+#define TEST_GUARD_GT(T1, T2) ((T1) >  (T2))
+#define TEST_GUARD_GE(T1, T2) ((T1) >= (T2))
 #endif
 
 
@@ -73,7 +97,7 @@ QBDI_NOINLINE int dummyFunCall(int arg0) {
 
 #if defined(QBDI_ARCH_X86) || defined(QBDI_ARCH_X86_64)
 #define MNEM_COUNT 5u
-#define MNEM_VALIDATION 123u
+#define MNEM_VALIDATION 128u
 #elif defined(QBDI_ARCH_ARM)
 #define MNEM_COUNT 1u
 #define MNEM_VALIDATION 25u
@@ -87,35 +111,36 @@ struct TestInst {
     uint32_t instSize;
     uint8_t numOperands;
     bool isCompare;
+    QBDI::RegisterAccessType flagsAccess;
     QBDI::OperandAnalysis operands[6];
 };
 
 #if defined(QBDI_ARCH_X86) || defined(QBDI_ARCH_X86_64)
 struct TestInst TestInsts[MNEM_COUNT] = {
-    {3, 2, true, {
+    {3, 2, true, QBDI::REGISTER_WRITE, {
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_NONE, 0, 1, 8, 3, "DH", QBDI::REGISTER_READ},
            {QBDI::OPERAND_IMM, QBDI::OPERANDFLAG_NONE, MNEM_IMM_SHORT_VAL, 1, 0, 0, NULL, QBDI::REGISTER_UNUSED},
         }
     },
 #if defined(QBDI_ARCH_X86_64)
-    {3, 2, true, {
+    {3, 2, true, QBDI::REGISTER_WRITE, {
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_NONE, 0, 8, 0, 0, "RAX", QBDI::REGISTER_READ},
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_NONE, 0, 8, 0, 1, "RBX", QBDI::REGISTER_READ},
         }
     },
 #else
-    {3, 2, true, {
+    {3, 2, true, QBDI::REGISTER_WRITE, {
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_NONE, 0, 2, 0, 0, "AX", QBDI::REGISTER_READ},
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_NONE, 0, 2, 0, 1, "BX", QBDI::REGISTER_READ},
         }
     },
 #endif
-    {5, 2, true, {
+    {5, 2, true, QBDI::REGISTER_WRITE, {
            {QBDI::OPERAND_IMM, QBDI::OPERANDFLAG_NONE, MNEM_IMM_VAL, 4, 0, 0, NULL, QBDI::REGISTER_UNUSED},
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_NONE, 0, 4, 0, 0, "EAX", QBDI::REGISTER_READ},
         }
     },
-    {1, 4, false, {
+    {1, 4, false, QBDI::REGISTER_READ | QBDI::REGISTER_WRITE, {
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_ADDR, 0, sizeof(QBDI::rword), 0, 5, QBDI::GPR_NAMES[5], QBDI::REGISTER_READ},
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_ADDR, 0, sizeof(QBDI::rword), 0, 4, QBDI::GPR_NAMES[4], QBDI::REGISTER_READ},
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_NONE, 0, 4, 0, 5, "EDI", QBDI::REGISTER_READ_WRITE},
@@ -123,9 +148,9 @@ struct TestInst TestInsts[MNEM_COUNT] = {
         }
     },
 #if defined(QBDI_ARCH_X86_64)
-    {5, 5, true, {
+    {5, 5, true, QBDI::REGISTER_WRITE, {
 #else
-    {4, 5, true, {
+    {4, 5, true, QBDI::REGISTER_WRITE, {
 #endif
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_NONE, 0, sizeof(QBDI::rword), 0, 0, QBDI::GPR_NAMES[0], QBDI::REGISTER_READ},
            {QBDI::OPERAND_GPR, QBDI::OPERANDFLAG_ADDR, 0, sizeof(QBDI::rword), 0, 4, QBDI::GPR_NAMES[4], QBDI::REGISTER_READ},
@@ -342,14 +367,14 @@ QBDI::VMAction evilMnemCbk(QBDI::VMInstanceRef vm, QBDI::GPRState *gprState, QBD
         info[0]++; // CMP count
         info[1]++;
         // validate address
-        if (TEST_GUARD(ana->address >= (QBDI::rword) &satanicFun &&
-            ana->address < (((QBDI::rword) &satanicFun) + 0x100))) {
+        if (TEST_GUARD_GE(ana->address, (QBDI::rword) &satanicFun) &&
+            TEST_GUARD_LT(ana->address, (((QBDI::rword) &satanicFun) + 0x100))) {
             info[1]++;
         }
         // validate inst size
         struct TestInst& currentInst = TestInsts[info[0] - 1];
 #if defined(QBDI_ARCH_X86) || defined(QBDI_ARCH_X86_64)
-        if (TEST_GUARD(ana->instSize == currentInst.instSize)) {
+        if (TEST_GUARD_EQ(ana->instSize, currentInst.instSize)) {
 #else
         {
 #endif
@@ -364,40 +389,44 @@ QBDI::VMAction evilMnemCbk(QBDI::VMInstanceRef vm, QBDI::GPRState *gprState, QBD
                 info[1]++;
             }
         }
+        if (TEST_GUARD_EQ(ana->flagsAccess, currentInst.flagsAccess)) {
+            info[1]++;
+        }
         // validate number of analyzed operands
-        if (TEST_GUARD(ana->numOperands == currentInst.numOperands)) {
+        if (TEST_GUARD_EQ(ana->numOperands, currentInst.numOperands)) {
             info[1]++;
         }
         // validate operands
-        if (TEST_GUARD(ana->operands != nullptr)) {
+        if (TEST_GUARD_NE(ana->operands, nullptr)) {
             info[1]++;
             for (uint8_t idx = 0; idx < std::min(ana->numOperands, currentInst.numOperands); idx++) {
                 const QBDI::OperandAnalysis& cmpOp = currentInst.operands[idx];
                 const QBDI::OperandAnalysis& op = ana->operands[idx];
-                if (TEST_GUARD(op.type == cmpOp.type)) {
+                if (TEST_GUARD_EQ(op.type, cmpOp.type)) {
                     info[1]++;
                 }
                 if (op.type == QBDI::OPERAND_IMM) {
-                    if (TEST_GUARD(op.value == cmpOp.value)) {
+                    if (TEST_GUARD_EQ(op.value, cmpOp.value)) {
                         info[1]++;
                     }
                 }
                 if (op.regName == nullptr && cmpOp.regName == nullptr) {
                     info[1]++;
-                } else if (TEST_GUARD(op.regName != nullptr && cmpOp.regName != nullptr &&
-                    std::string(op.regName) == std::string(cmpOp.regName))) {
+                } else if (TEST_GUARD_NE(op.regName, nullptr) &&
+                           TEST_GUARD_NE(cmpOp.regName, nullptr) &&
+                           TEST_GUARD_EQ(std::string(op.regName), std::string(cmpOp.regName))) {
                     info[1]++;
                 }
-                if (TEST_GUARD(op.size == cmpOp.size)) {
+                if (TEST_GUARD_EQ(op.size, cmpOp.size)) {
                     info[1]++;
                 }
-                if (TEST_GUARD(op.regCtxIdx == cmpOp.regCtxIdx)) {
+                if (TEST_GUARD_EQ(op.regCtxIdx, cmpOp.regCtxIdx)) {
                     info[1]++;
                 }
-                if (TEST_GUARD(op.regOff == cmpOp.regOff)) {
+                if (TEST_GUARD_EQ(op.regOff, cmpOp.regOff)) {
                     info[1]++;
                 }
-                if (TEST_GUARD(op.regAccess == cmpOp.regAccess)) {
+                if (TEST_GUARD_EQ(op.regAccess, cmpOp.regAccess)) {
                     info[1]++;
                 }
             }
