@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "Context.h"
-#include "InstAnalysis.h"
+#include "Utility/InstAnalysis_prive.h"
 #include "Range.h"
 #include "Utility/Assembly.h"
 #include "ExecBlock/ExecBlock.h"
