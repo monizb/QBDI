@@ -437,7 +437,7 @@ TEST_F(VMTest, MnemCallback) {
 
 QBDI::VMAction checkTransfer(QBDI::VMInstanceRef vm, const QBDI::VMState *state, QBDI::GPRState *gprState, QBDI::FPRState *fprState, void *data) {
     int* s = (int*) data;
-#if defined(QBDI_PLATFORM_LINUX) || defined(QBDI_OS_ANDROID) || defined(QBDI_OS_DARWIN)
+#if defined(QBDI_PLATFORM_LINUX) || defined(QBDI_PLATFORM_ANDROID) || defined(QBDI_PLATFORM_OSX)
     QBDI::rword allocAPI = (QBDI::rword) &posix_memalign;
     QBDI::rword freeAPI = (QBDI::rword) &free;
 #elif defined(QBDI_PLATFORM_WINDOWS)

@@ -44,7 +44,7 @@ void* alignedAlloc(size_t size, size_t align) {
     if ((align == 0) || ((align & (align - 1)) != 0)) {
         return nullptr;
     }
-#if defined(QBDI_PLATFORM_LINUX) || defined(QBDI_PLATFORM_ANDROID) || defined(QBDI_OS_DARWIN)
+#if defined(QBDI_PLATFORM_LINUX) || defined(QBDI_PLATFORM_ANDROID) || defined(QBDI_PLATFORM_OSX)
     int ret = posix_memalign(&allocated, align, size);
     if (ret != 0) {
         return nullptr;
@@ -56,7 +56,7 @@ void* alignedAlloc(size_t size, size_t align) {
 }
 
 void alignedFree(void* ptr) {
-#if defined(QBDI_PLATFORM_LINUX) || defined(QBDI_PLATFORM_ANDROID) || defined(QBDI_OS_DARWIN)
+#if defined(QBDI_PLATFORM_LINUX) || defined(QBDI_PLATFORM_ANDROID) || defined(QBDI_PLATFORM_OSX)
     free(ptr);
 #elif defined(QBDI_PLATFORM_WINDOWS)
     _aligned_free(ptr);

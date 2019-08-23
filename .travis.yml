@@ -50,7 +50,7 @@ install_llvm: &install_llvm
     - eval '[[ -n "$(find ../deps/llvm/${QBDI_PLATFORM}-${QBDI_ARCH}/lib -type f -print -quit)" && -n "$(find ../deps/llvm/${QBDI_PLATFORM}-${QBDI_ARCH}/include -type f -print -quit)" ]] || make llvm'
   before_cache:
     # Reduce cache size
-    - python3 ../deps/llvm/build.py clean ${QBDI_PLATFORM}
+    - python3 ../deps/llvm/build.py clean ${QBDI_PLATFORM}-${QBDI_ARCH}
 
 install_gtest: &install_gtest
   script:
@@ -59,7 +59,7 @@ install_gtest: &install_gtest
     - eval '[[ -n "$(find ../deps/gtest/${QBDI_PLATFORM}-${QBDI_ARCH}/lib -type f -print -quit)" && -n "$(find ../deps/gtest/${QBDI_PLATFORM}-${QBDI_ARCH}/include -type f -print -quit)" ]] || make gtest'
   before_cache:
     # Reduce cache size
-    - sh ../deps/gtest/${QBDI_PLATFORM}/build.sh clean
+    - sh ../deps/gtest/${QBDI_PLATFORM}-${QBDI_ARCH}/build.sh clean
 
 docker_llvm: &docker_llvm
   services:

@@ -23,8 +23,8 @@ if (NOT (LLVMLibFile AND LLVMIncludeFile))
 endif()
 
 # Google Test
-if(TEST_QBDI)
-    if(${OS} STREQUAL "win")
+if(QBDI_TEST)
+    if(QBDI_PLATFORM_WINDOWS)
     add_custom_target(gtest
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/deps/gtest/${QBDI_PLATFORM}-${QBDI_ARCH}/
         COMMAND python build.py prepare
