@@ -24,8 +24,8 @@
 #include <cstdint>
 #include <algorithm>
 
-#ifndef QBDI_OS_WIN
-#if defined(QBDI_OS_LINUX) && !defined(__USE_GNU)
+#ifndef QBDI_PLATFORM_WINDOWS
+#if defined(QBDI_PLATFORM_LINUX) && !defined(__USE_GNU)
 #define __USE_GNU
 #endif
 #include <dlfcn.h>
@@ -589,7 +589,7 @@ const InstAnalysis* ExecBlockManager::analyzeInstMetadata(const InstMetadata* in
 
     if (type & ANALYSIS_SYMBOL) {
         // find nearest symbol (if any)
-#ifndef QBDI_OS_WIN
+#ifndef QBDI_PLATFORM_WINDOWS
         Dl_info info;
         const char* ptr;
 

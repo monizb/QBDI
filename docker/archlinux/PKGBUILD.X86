@@ -20,17 +20,19 @@ build() {
     cd "$pkgname-$pkgver"
     cmake -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_CROSSCOMPILING=FALSE \
-          -DPLATFORM=linux-X86 \
+          -DQBDI_PLATFORM=LINUX \
+          -DQBDI_ARCH=X86 \
           -DCMAKE_INSTALL_PREFIX=/usr \
-          -DTOOLS_PYQBDI=FALSE \
+          -DQBDI_TOOLS_PYQBDI=OFF \
           ../../../
     [[ -d "../../../deps/llvm/linux-X86" ]] || make llvm
     [[ -d "../../../deps/gtest/linux-X86" ]] || make gtest
     cmake -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_CROSSCOMPILING=FALSE \
-          -DPLATFORM=linux-X86 \
+          -DQBDI_PLATFORM=LINUX \
+          -DQBDI_ARCH=X86 \
           -DCMAKE_INSTALL_PREFIX=/usr \
-          -DTOOLS_PYQBDI=FALSE \
+          -DQBDI_TOOLS_PYQBDI=OFF \
           ../../../
     make -j4
 }

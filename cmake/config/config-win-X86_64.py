@@ -7,4 +7,5 @@ subprocess.check_call(["cmake", "..",
                        "-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING",
                        "-DCMAKE_BUILD_TYPE=Release",
                        "-DCMAKE_CROSSCOMPILING=FALSE",
-                       "-DPLATFORM=win-X86_64"])
+                       "-DQBDI_PLATFORM=WINDOWS",
+                       "-DQBDI_ARCH=X86_64"])

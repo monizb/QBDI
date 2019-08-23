@@ -16,34 +16,38 @@ linux_target: &linux_target
   dist: xenial
   compiler: gcc
   env:
-    QBDI_PLATFORM="linux-X86_64"
+    - QBDI_PLATFORM="LINUX"
+    - QBDI_ARCH="X86_64"
 
 linux_target32: &linux_target32
   os: linux
   dist: xenial
   compiler: gcc
   env:
-    QBDI_PLATFORM="linux-X86"
+    - QBDI_PLATFORM="LINUX"
+    - QBDI_ARCH="X86"
 
 osx_target: &osx_target
   os: osx
   osx_image: xcode9.4
   env:
-    - QBDI_PLATFORM="macOS-X86_64"
-    - CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_CROSSCOMPILING=FALSE -DPLATFORM=${QBDI_PLATFORM} -DTOOLS_VALIDATOR=TRUE -DEXAMPLES=TRUE"
+    - QBDI_PLATFORM="OSX"
+    - QBDI_ARCH="X86_64"
+    - CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_CROSSCOMPILING=FALSE -DQBDI_PLATFORM=${QBDI_PLATFORM} -DQBDI_ARCH=${QBDI_ARCH} -DQBDI_TOOLS_VALIDATOR=TRUE -DQBDI_EXAMPLES=TRUE"
 
 osx_target32: &osx_target32
   os: osx
   osx_image: xcode9.4
   env:
-    - QBDI_PLATFORM="macOS-X86"
-    - CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_CROSSCOMPILING=FALSE -DPLATFORM=${QBDI_PLATFORM} -DTOOLS_VALIDATOR=TRUE -DEXAMPLES=TRUE"
+    - QBDI_PLATFORM="OSX"
+    - QBDI_ARCH="X86"
+    - CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_CROSSCOMPILING=FALSE -DQBDI_PLATFORM=${QBDI_PLATFORM} -DQBDI_ARCH=${QBDI_ARCH} -DQBDI_TOOLS_VALIDATOR=TRUE -DQBDI_EXAMPLES=TRUE"
 
 install_llvm: &install_llvm
   script:
     - mkdir build && cd build
     - cmake .. ${CMAKE_ARGS}
-    - eval '[[ -n "$(find ../deps/llvm/${QBDI_PLATFORM}/lib -type f -print -quit)" && -n "$(find ../deps/llvm/${QBDI_PLATFORM}/include -type f -print -quit)" ]] || make llvm'
+    - eval '[[ -n "$(find ../deps/llvm/${QBDI_PLATFORM}-${QBDI_ARCH}/lib -type f -print -quit)" && -n "$(find ../deps/llvm/${QBDI_PLATFORM}-${QBDI_ARCH}/include -type f -print -quit)" ]] || make llvm'
   before_cache:
     # Reduce cache size
     - python3 ../deps/llvm/build.py clean ${QBDI_PLATFORM}
@@ -52,7 +56,7 @@ install_gtest: &install_gtest
   script:
     - mkdir build && cd build
     - cmake .. ${CMAKE_ARGS}
-    - eval '[[ -n "$(find ../deps/gtest/${QBDI_PLATFORM}/lib -type f -print -quit)" && -n "$(find ../deps/gtest/${QBDI_PLATFORM}/include -type f -print -quit)" ]] || make gtest'
+    - eval '[[ -n "$(find ../deps/gtest/${QBDI_PLATFORM}-${QBDI_ARCH}/lib -type f -print -quit)" && -n "$(find ../deps/gtest/${QBDI_PLATFORM}-${QBDI_ARCH}/include -type f -print -quit)" ]] || make gtest'
   before_cache:
     # Reduce cache size
     - sh ../deps/gtest/${QBDI_PLATFORM}/build.sh clean
@@ -63,7 +67,7 @@ docker_llvm: &docker_llvm
   script:
     - bash ./docker/travis_linux/llvm.sh
 
-install_gtest: &docker_gtest
+docker_gtest: &docker_gtest
   services:
     - docker
   script:
@@ -88,22 +92,22 @@ cache:
 
 cache:
   directories:
-    - deps/llvm/linux-X86_64/include
-    - deps/llvm/linux-X86_64/lib
-    - deps/llvm/linux-X86/include
-    - deps/llvm/linux-X86/lib
-    - deps/llvm/macOS-X86_64/include
-    - deps/llvm/macOS-X86_64/lib
-    - deps/llvm/macOS-X86/include
-    - deps/llvm/macOS-X86/lib
-    - deps/gtest/linux-X86_64/include
-    - deps/gtest/linux-X86_64/lib
-    - deps/gtest/linux-X86/include
-    - deps/gtest/linux-X86/lib
-    - deps/gtest/macOS-X86_64/include
-    - deps/gtest/macOS-X86_64/lib
-    - deps/gtest/macOS-X86/include
-    - deps/gtest/macOS-X86/lib
+    - deps/llvm/LINUX-X86_64/include
+    - deps/llvm/LINUX-X86_64/lib
+    - deps/llvm/LINUX-X86/include
+    - deps/llvm/LINUX-X86/lib
+    - deps/llvm/OSX-X86_64/include
+    - deps/llvm/OSX-X86_64/lib
+    - deps/llvm/OSX-X86/include
+    - deps/llvm/OSX-X86/lib
+    - deps/gtest/LINUX-X86_64/include
+    - deps/gtest/LINUX-X86_64/lib
+    - deps/gtest/LINUX-X86/include
+    - deps/gtest/LINUX-X86/lib
+    - deps/gtest/OSX-X86_64/include
+    - deps/gtest/OSX-X86_64/lib
+    - deps/gtest/OSX-X86/include
+    - deps/gtest/OSX-X86/lib
     - tools/validation_runner/travis_db
 
 sudo: required

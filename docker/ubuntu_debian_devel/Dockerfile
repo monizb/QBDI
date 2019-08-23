@@ -2,11 +2,12 @@ ARG DOCKER_IMG="ubuntu:18.04"
 
 FROM $DOCKER_IMG
 
-ARG QBDI_PLATFORM="linux-X86_64"
+ARG QBDI_ARCH="X86_64"
 
 ENV USER="docker" \
     HOME="/home/docker" \
-    PREFIX="/usr"
+    PREFIX="/usr" \
+    QBDI_PLATFOMR="LINUX"
 
 # Get latest package list, upgrade packages, install required packages
 # and cleanup to keep container as small as possible
@@ -50,7 +51,7 @@ WORKDIR $HOME
 
 RUN sudo chown -R $USER:$USER .
 
-WORKDIR $HOME/qbdi-deps/deps/gtest/$QBDI_PLATFORM
+WORKDIR $HOME/qbdi-deps/deps/gtest/${QBDI_PLATFORM}-${QBDI_ARCH}
 
 RUN sh build.sh prepare && \
     sh build.sh build && \
@@ -59,10 +60,10 @@ RUN sh build.sh prepare && \
 
 WORKDIR $HOME/qbdi-deps/deps/llvm/
 
-RUN python3 build.py prepare $QBDI_PLATFORM && \
-    python3 build.py build $QBDI_PLATFORM && \
-    python3 build.py package $QBDI_PLATFORM && \
-    python3 build.py clean $QBDI_PLATFORM
+RUN python3 build.py prepare ${QBDI_PLATFORM}-${QBDI_ARCH} && \
+    python3 build.py build ${QBDI_PLATFORM}-${QBDI_ARCH} && \
+    python3 build.py package ${QBDI_PLATFORM}-${QBDI_ARCH} && \
+    python3 build.py clean ${QBDI_PLATFORM}-${QBDI_ARCH}
 
 # install validator dependency after build llvm to use the same cache between devel and release image
 RUN sudo apt-get update && \
@@ -94,7 +95,8 @@ RUN sudo chown -R $USER:$USER . && \
     cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_CROSSCOMPILING=FALSE \
-          -DPLATFORM=$QBDI_PLATFORM \
+          -DQBDI_PLATFORM=$QBDI_PLATFORM \
+          -DQBDI_ARCH=$QBDI_ARCH \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
           -DLOG_DEBUG=TRUE \
           -DEXAMPLES=TRUE \

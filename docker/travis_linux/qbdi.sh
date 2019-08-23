@@ -6,12 +6,12 @@ set -x
 BASEDIR=$(cd $(dirname "$0") && pwd -P)
 GITDIR=$(cd "${BASEDIR}/../.." && pwd -P)
 
-if [[ "linux-X86_64" = "${QBDI_PLATFORM}" ]]; then
+if [[ "X86_64" = "${QBDI_ARCH}" ]]; then
     docker build "${GITDIR}" -t qbdi_build:base -f "${BASEDIR}/base_X86_64.dockerfile"
-elif [[ "linux-X86" = "${QBDI_PLATFORM}" ]]; then
+elif [[ "X86" = "${QBDI_ARCH}" ]]; then
     docker build "${GITDIR}" -t qbdi_build:base -f "${BASEDIR}/base_X86.dockerfile"
 else
-    echo "Unknown QBDI_PLATFORM : ${QBDI_PLATFORM}"
+    echo "Unknown QBDI_ARCH : ${QBDI_ARCH}"
     exit 1
 fi
 

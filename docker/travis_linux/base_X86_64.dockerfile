@@ -5,7 +5,8 @@ FROM ubuntu:$UBUNTU_TAG
 ENV USER="docker" \
     HOME="/home/docker" \
     PREFIX="/usr" \
-    QBDI_PLATFORM="linux-X86_64"
+    QBDI_PLATFORM="LINUX" \
+    QBDI_ARCH="X86_64"
 
 # Get latest package list, upgrade packages, install required packages 
 # and cleanup to keep container as small as possible

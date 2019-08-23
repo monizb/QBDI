@@ -44,21 +44,21 @@ void* alignedAlloc(size_t size, size_t align) {
     if ((align == 0) || ((align & (align - 1)) != 0)) {
         return nullptr;
     }
-#if defined(QBDI_OS_LINUX) || defined(QBDI_OS_ANDROID) || defined(QBDI_OS_DARWIN)
+#if defined(QBDI_PLATFORM_LINUX) || defined(QBDI_PLATFORM_ANDROID) || defined(QBDI_OS_DARWIN)
     int ret = posix_memalign(&allocated, align, size);
     if (ret != 0) {
         return nullptr;
     }
-#elif defined(QBDI_OS_WIN)
+#elif defined(QBDI_PLATFORM_WINDOWS)
     allocated = _aligned_malloc(size, align);
 #endif
     return allocated;
 }
 
 void alignedFree(void* ptr) {
-#if defined(QBDI_OS_LINUX) || defined(QBDI_OS_ANDROID) || defined(QBDI_OS_DARWIN)
+#if defined(QBDI_PLATFORM_LINUX) || defined(QBDI_PLATFORM_ANDROID) || defined(QBDI_OS_DARWIN)
     free(ptr);
-#elif defined(QBDI_OS_WIN)
+#elif defined(QBDI_PLATFORM_WINDOWS)
     _aligned_free(ptr);
 #endif
 }
@@ -107,7 +107,7 @@ void simulateCallA(GPRState *ctx, rword returnAddress, uint32_t argNum, const rw
 
 #define UNSTACK_ARG(REG) if (i < argNum) { ctx->REG = args[i++]; }
 #if defined(QBDI_ARCH_X86_64)
- #if defined(QBDI_OS_WIN)
+ #if defined(QBDI_PLATFORM_WINDOWS)
     // Shadow space
     argsoff += 4;
     // Register args

@@ -1,16 +1,13 @@
-if((HAS_QBDIPRELOAD) AND (TOOLS_QBDIPRELOAD))
-    message(STATUS "Compile QBDIPreload")
+if(QBID_TOOLS_QBDIPRELOAD)
     # Add QBDI preload library
     add_subdirectory(QBDIPreload)
 
-    if(TOOLS_VALIDATOR)
-        message(STATUS "Compile validator")
+    if(QBDI_TOOLS_VALIDATOR)
         # Add validator
         add_subdirectory(validator)
     endif()
 
-    if(TOOLS_PYQBDI)
-        message(STATUS "Compile PyQBDI")
+    if(QBDI_TOOLS_PYQBDI)
         # Add pyqbdi
         add_subdirectory(pyqbdi)
     endif()

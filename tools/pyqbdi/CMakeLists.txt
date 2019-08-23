@@ -1,6 +1,6 @@
 set(SOURCES "pyqbdi.cpp")
 
-if(HAS_QBDIPRELOAD AND (NOT (${ARCH} STREQUAL "ARM" )))
+if(QBDI_ARCH_X86 OR QBDI_ARCH_X86_64)
     unset(PYTHON_EXECUTABLE CACHE)
     unset(PYTHON_INCLUDE_DIR CACHE)
     # Find Python 2.7

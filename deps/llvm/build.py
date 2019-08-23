@@ -69,12 +69,12 @@ def build_llvm(llvm_dir, build_dir, arch, platform, arch_opt=None):
         build_dir.mkdir()
 
     # set platform specific arguments.
-    if platform == "win" and arch_opt == "i386":
+    if platform == "WINDOWS" and arch_opt == "i386":
         cmake_specific_option = ["-G", "Ninja",
                                  "-DLLVM_BUILD_32_BITS=On"]
-    elif platform == "win":
+    elif platform == "WINDOWS":
         cmake_specific_option = ["-G", "Ninja"]
-    elif platform == "iOS":
+    elif platform == "IOS":
         cc = subprocess.check_output(["xcrun", "--sdk", "iphoneos", "-f", "clang"])
         cxx = subprocess.check_output(["xcrun", "--sdk", "iphoneos", "-f", "clang++"])
         sdk = subprocess.check_output(["xcrun", "--sdk", "iphoneos", "--show-sdk-path"])
@@ -87,7 +87,7 @@ def build_llvm(llvm_dir, build_dir, arch, platform, arch_opt=None):
                                  "-DCMAKE_CXX_FLAGS=-arch " + arch_opt + " -isysroot " + sdk + " -fvisibility=hidden",
                                  "-DCMAKE_C_COMPILER=" + cc,
                                  "-DCMAKE_CXX_COMPILER=" + cxx]
-    elif platform == "linux" and arch == "ARM":
+    elif platform == "LINUX" and arch == "ARM":
         ARM_C_INCLUDE="/usr/arm-linux-gnueabi/include/"
         ARM_CXX_INCLUDE="/usr/arm-linux-gnueabi/include/c++/6/"
         cmake_specific_option = [
@@ -98,7 +98,7 @@ def build_llvm(llvm_dir, build_dir, arch, platform, arch_opt=None):
             "-DCMAKE_C_FLAGS=-fvisibility=hidden -march=" + arch_opt + " -I" + ARM_C_INCLUDE,
             "-DCMAKE_CXX_FLAGS=-fvisibility=hidden -march=" + arch_opt + " -I" + ARM_C_INCLUDE + " -I" + ARM_CXX_INCLUDE,
         ]
-    elif platform == "android":
+    elif platform == "ANDROID":
         defaul_ndk_path = str(Path.home() / "android-ndk-r20")
         ndk_path = os.getenv("NDK_PATH", defaul_ndk_path)
 
@@ -130,12 +130,12 @@ def build_llvm(llvm_dir, build_dir, arch, platform, arch_opt=None):
                     '-DANDROID_ABI=x86_64',
                     ]
 
-    elif platform == "macOS" and arch_opt == "i386":
+    elif platform == "OSX" and arch_opt == "i386":
         cmake_specific_option = ['-DLLVM_BUILD_32_BITS=On',
                                  '-DLLVM_DEFAULT_TARGET_TRIPLE=i386-apple-darwin17.7.0',
                                  '-DCMAKE_C_FLAGS=-fvisibility=hidden',
                                  '-DCMAKE_CXX_FLAGS=-fvisibility=hidden']
-    elif platform == "linux" and arch_opt == "i386":
+    elif platform == "LINUX" and arch_opt == "i386":
         cmake_specific_option = ['-DLLVM_BUILD_32_BITS=On',
                                  '-DLLVM_DEFAULT_TARGET_TRIPLE=i386-pc-linux',
                                  '-DCMAKE_C_FLAGS=-fvisibility=hidden',
@@ -160,7 +160,7 @@ def build_llvm(llvm_dir, build_dir, arch, platform, arch_opt=None):
                           cwd=str(build_dir))
 
     # Compile llvm libraries
-    if platform == "win":
+    if platform == "WINDOWS":
         subprocess.check_call(["ninja"] + get_libraries(arch, ext=".lib"),
                               cwd=str(build_dir))
     else:
@@ -207,7 +207,7 @@ def install_header_and_lib(llvm_source, build_dir, dest, arch):
         rename_object.rename_object(str(dest / "lib/libLLVMSupport.a"), "Memory.cpp.o")
         rename_object.rename_object(str(dest / "lib/libLLVMSupport.a"), "Error.cpp.o")
         rename_object.rename_object(str(dest / "lib/libLLVMSupport.a"), "LowLevelType.cpp.o")
-        # FIXME: Should we keep it only for iOS?
+        # FIXME: Should we keep it only for IOS?
         rename_object.rename_object(str(dest / "lib/libLLVMSupport.a"), "Parallel.cpp.o", True)
 
 
@@ -225,18 +225,20 @@ if __name__ == "__main__":
         sys.exit(1)
 
     target = sys.argv[2]
-    assert(target in ("android-ARM", "android-X86", "android-X86_64", "iOS-ARM", "linux-ARM", "linux-X86_64", "linux-X86", "macOS-X86_64", "macOS-X86", "win-X86_64", "win-X86"))
 
     platform = target.split("-")[0]
     arch = target.split("-")[1]
 
+    assert (platform in ("ANDROID", "IOS", "LINUX", "OSX", "WINDOWS"))
+    assert (arch in ("ARM", "X86_64", "X86"))
+
     arch_opt = None
     if arch == "ARM":
-        if platform == "linux":
+        if platform == "LINUX":
             arch_opt = "armv6"
-        elif platform == "iOS":
+        elif platform == "IOS":
             arch_opt = "armv7"
-        elif platform == "android":
+        elif platform == "ANDROID":
             arch_opt = "armv7-a"
         else:
             raise RuntimeError("Unknown platform")
