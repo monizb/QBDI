@@ -30,6 +30,7 @@ add_executable(QBDITest ${SOURCES})
 add_signature(QBDITest)
 
 target_include_directories(QBDITest PRIVATE
+    "${CMAKE_BINARY_DIR}/include"
     "${CMAKE_BINARY_DIR}/include/QBDI"
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../src"

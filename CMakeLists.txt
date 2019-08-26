@@ -263,6 +263,7 @@ if(${DEPENDENCY_SATISFIED})
     add_library(QBDI_obj STATIC ${SOURCES})
 
     target_include_directories(QBDI_obj PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}/include"
         "${CMAKE_CURRENT_BINARY_DIR}/include/QBDI"
         "${CMAKE_CURRENT_SOURCE_DIR}/include/QBDI"
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -282,6 +283,7 @@ if(${DEPENDENCY_SATISFIED})
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/QBDI>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/QBDI>
         )
 
@@ -295,6 +297,7 @@ if(${DEPENDENCY_SATISFIED})
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/QBDI>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/QBDI>
         )
 
