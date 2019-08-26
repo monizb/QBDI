@@ -1,4 +1,4 @@
-if(QBID_TOOLS_QBDIPRELOAD)
+if(QBDI_TOOLS_QBDIPRELOAD)
     # Add QBDI preload library
     add_subdirectory(QBDIPreload)
 
