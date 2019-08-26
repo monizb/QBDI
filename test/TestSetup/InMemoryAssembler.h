@@ -18,7 +18,7 @@
 #ifndef INMEMORYASSEMBLER_H
 #define INMEMORYASSEMBLER_H
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "llvm/ADT/Triple.h"
 #include "llvm/ADT/SmallVector.h"

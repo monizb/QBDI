@@ -35,7 +35,7 @@ InMemoryObject::InMemoryObject(const char* source, const char* cpu, const char**
     std::string                              featuresStr;
     std::error_code                          ec;
     llvm::SmallVector<char, 1024>            objectVector;
- 
+
     if(mattrs != nullptr) {
         llvm::SubtargetFeatures features;
         for (unsigned i = 0; mattrs[i] != nullptr; i++) {
@@ -70,7 +70,7 @@ InMemoryObject::InMemoryObject(const char* source, const char* cpu, const char**
     );
     auto MAB = std::unique_ptr<llvm::MCAsmBackend>(processTarget->createMCAsmBackend(*MSTI, *MRI, llvm::MCTargetOptions()));
     auto MCE = std::unique_ptr<llvm::MCCodeEmitter>(processTarget->createMCCodeEmitter(*MCII, *MRI, *MCTX));
-   
+
     // Wrap output object into raw_ostream
     //raw_pwrite_string_ostream rpsos(objectStr);
     llvm::raw_svector_ostream rsos(objectVector);
@@ -84,16 +84,16 @@ InMemoryObject::InMemoryObject(const char* source, const char* cpu, const char**
         llvm::SMLoc()
     );
     // Set MCStreamer as a MCObjectStreamer
-    mcStr.reset(processTarget->createMCObjectStreamer(MSTI->getTargetTriple(), *MCTX, std::move(MAB), 
+    mcStr.reset(processTarget->createMCObjectStreamer(MSTI->getTargetTriple(), *MCTX, std::move(MAB),
                                                       std::move(objectWriter), std::move(MCE), *MSTI, true, false, false));
     // Create the assembly parsers
     llvm::MCAsmParser* parser = llvm::createMCAsmParser(SrcMgr, *MCTX, *mcStr, *MAI);
-    llvm::MCTargetAsmParser* tap = 
+    llvm::MCTargetAsmParser* tap =
         processTarget->createMCAsmParser(*MSTI, *parser, *MCII, llvm::MCTargetOptions());
     parser->setTargetParser(*tap);
     // Finally do something we care about
     mcStr->InitSections(false);
-    EXPECT_FALSE(parser->Run(true));
+    CHECK_FALSE(parser->Run(true));
     delete parser;
     delete tap;
     // Copy object into new page and make it executable
@@ -108,7 +108,7 @@ InMemoryObject::InMemoryObject(const char* source, const char* cpu, const char**
 #endif
 
     // LLVM Insanity Oriented Programming
-    llvm::Expected<std::unique_ptr<llvm::object::ObjectFile>> obj_ptr = 
+    llvm::Expected<std::unique_ptr<llvm::object::ObjectFile>> obj_ptr =
         llvm::object::ObjectFile::createObjectFile(
             llvm::MemoryBufferRef(
                 llvm::StringRef(
@@ -138,6 +138,6 @@ InMemoryObject::InMemoryObject(const char* source, const char* cpu, const char**
             }
         }
     }
-    EXPECT_LT((unsigned int) 0, text_section.size());
+    CHECK((unsigned int) 0 < text_section.size());
     code = llvm::ArrayRef<uint8_t>((const uint8_t*) text_section.data(), text_section.size());
 }

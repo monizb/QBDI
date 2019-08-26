@@ -21,7 +21,7 @@
 #include <string.h>
 #include <string>
 #include <sstream>
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "ComparedExecutor_ARM.h"
 

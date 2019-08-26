@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include <stdio.h>
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "TestSetup/LLVMTestEnv.h"
 

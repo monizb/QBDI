@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "VM.h"
 #include "ExecBlock/ExecBlockManager.h"
@@ -28,7 +28,7 @@
 
 #include "TestSetup/InMemoryAssembler.h"
 
-class ShellcodeTester : public ::testing::Test {
+class ShellcodeTester {
 protected:
 
     using PF = llvm::sys::Memory::ProtectionFlags;
@@ -46,10 +46,10 @@ public:
 
     virtual InMemoryObject compileWithContextSwitch(const char* source) = 0;
 
-    virtual QBDI::Context jitExec(llvm::ArrayRef<uint8_t> code, QBDI::Context &inputCtx, 
+    virtual QBDI::Context jitExec(llvm::ArrayRef<uint8_t> code, QBDI::Context &inputCtx,
                                   llvm::sys::MemoryBlock &stack) = 0;
 
-    virtual QBDI::Context realExec(llvm::ArrayRef<uint8_t> code, QBDI::Context &inputCtx, 
+    virtual QBDI::Context realExec(llvm::ArrayRef<uint8_t> code, QBDI::Context &inputCtx,
                                    llvm::sys::MemoryBlock &stack) = 0;
 
     virtual void comparedExec(const char* source, QBDI::Context &inputCtx, QBDI::rword stackSize);

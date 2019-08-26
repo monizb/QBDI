@@ -18,7 +18,7 @@
 #ifndef LLVMTESTENV_H
 #define LLVMTESTENV_H
 
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "llvm/ADT/Triple.h"
 #include "llvm/ADT/SmallVector.h"
@@ -41,7 +41,7 @@
 #include "Utility/Assembly.h"
 
 
-class LLVMTestEnv : public ::testing::Test {
+class LLVMTestEnv {
 protected:
 
     std::unique_ptr<llvm::MCAsmInfo>         MAI;
@@ -57,12 +57,9 @@ protected:
     std::string                              cpu;
     std::vector<std::string>                 mattrs;
 
-    virtual void SetUp();
-
 public:
 
-    LLVMTestEnv(std::string cpu = "", std::vector<std::string> mattrs = {}): 
-        cpu(cpu), mattrs(mattrs) {}
+    LLVMTestEnv(std::string cpu = "", std::vector<std::string> mattrs = {});
 };
 
 #endif

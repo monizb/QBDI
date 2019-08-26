@@ -15,16 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 
 #include "VM.h"
 
-class VMTest : public ::testing::Test {
+class VMTest {
     protected:
+        VMTest();
+        ~VMTest();
+
         QBDI::VM* vm;
         QBDI::GPRState* state;
         uint8_t* fakestack;
-
-        virtual void SetUp();
-        virtual void TearDown();
 };

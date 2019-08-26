@@ -18,7 +18,8 @@
 #include "TestSetup/LLVMTestEnv.h"
 #include "Platform.h"
 
-void LLVMTestEnv::SetUp() {
+LLVMTestEnv::LLVMTestEnv(std::string cpu, std::vector<std::string> mattrs) :
+        cpu(cpu), mattrs(mattrs) {
     std::string error;
     std::string featuresStr;
 
@@ -47,35 +48,35 @@ void LLVMTestEnv::SetUp() {
     );
     llvm::Triple process_triple(tripleName);
     processTarget = llvm::TargetRegistry::lookupTarget(tripleName, error);
-    ASSERT_NE(nullptr, processTarget);
+    REQUIRE(nullptr != processTarget);
     // Allocate all LLVM classes
     MRI = std::unique_ptr<llvm::MCRegisterInfo>(
         processTarget->createMCRegInfo(tripleName)
     );
-    ASSERT_TRUE(MRI != nullptr);
+    REQUIRE(MRI != nullptr);
     MAI = std::unique_ptr<llvm::MCAsmInfo>(
         processTarget->createMCAsmInfo(*MRI, tripleName)
     );
-    ASSERT_TRUE(MAI != nullptr);
+    REQUIRE(MAI != nullptr);
     MOFI = std::unique_ptr<llvm::MCObjectFileInfo>(new llvm::MCObjectFileInfo());
-    ASSERT_TRUE(MOFI != nullptr);
+    REQUIRE(MOFI != nullptr);
     MCTX = std::unique_ptr<llvm::MCContext>(new llvm::MCContext(MAI.get(), MRI.get(), MOFI.get()));
-    ASSERT_TRUE(MCTX != nullptr);
+    REQUIRE(MCTX != nullptr);
     MCII = std::unique_ptr<llvm::MCInstrInfo>(processTarget->createMCInstrInfo());
-    ASSERT_TRUE(MCII != nullptr);
+    REQUIRE(MCII != nullptr);
     MSTI = std::unique_ptr<llvm::MCSubtargetInfo>(
       processTarget->createMCSubtargetInfo(tripleName, cpu, featuresStr)
     );
-    ASSERT_TRUE(MSTI != nullptr);
+    REQUIRE(MSTI != nullptr);
     auto MAB = std::unique_ptr<llvm::MCAsmBackend>(
         processTarget->createMCAsmBackend(*MSTI, *MRI, llvm::MCTargetOptions())
     );
     MCE = std::unique_ptr<llvm::MCCodeEmitter>(
        processTarget->createMCCodeEmitter(*MCII, *MRI, *MCTX)
     );
-    ASSERT_TRUE(MAB != nullptr);
+    REQUIRE(MAB != nullptr);
     assembly = std::unique_ptr<QBDI::Assembly>(
         new QBDI::Assembly(*MCTX, std::move(MAB), *MCII, *processTarget, *MSTI)
     );
-    ASSERT_TRUE(assembly != nullptr);
+    REQUIRE(assembly != nullptr);
 }
