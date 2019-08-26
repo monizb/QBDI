@@ -2,6 +2,10 @@ FROM qbdi_build:base
 
 ARG QBDI_BUILD_TYPE=Release
 
+# intall dependency for validator
+RUN sudo apt-get install -y python-yaml zip git xxd && \
+    mkdir -p tools/validation_runner/travis_db/
+
 RUN mkdir qbdi/build && \
     cd qbdi/build && \
     cmake -DCMAKE_BUILD_TYPE=$QBDI_BUILD_TYPE \
@@ -14,6 +18,3 @@ RUN mkdir qbdi/build && \
           -DQBDI_TOOLS_PYQBDI=ON && \
     make -j4
 
-# intall dependency for validator
-RUN sudo apt-get install -y python-yaml zip git xxd && \
-    mkdir -p tools/validation_runner/travis_db/
