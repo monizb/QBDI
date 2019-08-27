@@ -49,6 +49,7 @@ after_build:
 
 test_script:
   - cmd: c:\projects\qbdi\build\test\QBDItest
+  - cmd: c:\projects\qbdi\build\test\QBDIBenchmark
 
 artifacts:
   - name: Installer

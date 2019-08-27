@@ -17,6 +17,7 @@ fi
 
 docker build "${GITDIR}" -t qbdi_build:qbdi -f "${BASEDIR}/qbdi.dockerfile"
 docker run -it --rm qbdi_build:qbdi ./qbdi/build/test/QBDITest
+docker run -it --rm qbdi_build:qbdi ./qbdi/build/test/QBDIBenchmark
 
 set +e
 

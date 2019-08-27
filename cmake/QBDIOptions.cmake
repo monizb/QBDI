@@ -21,8 +21,11 @@ option(QBDI_ASAN "Enable AddressSanitizer (ASAN) for debugging (May be slow down
 # Enable the logging level debug
 option(QBDI_LOG_DEBUG "Enable Debug log level" OFF)
 
-# test (need gtest)
+# test
 option(QBDI_TEST "Compile tests" ON)
+
+# benchmark
+option(QBDI_BENCHMARK "Compile benchmark" ON)
 
 # example
 option(QBDI_EXAMPLES "Compile examples" OFF)
@@ -68,6 +71,7 @@ else()
     message("QBDI_LOG_DEBUG:        ${QBDI_LOG_DEBUG}")
 endif()
 message("QBDI_TEST:             ${QBDI_TEST}")
+message("QBDI_BENCHMARK:        ${QBDI_BENCHMARK}")
 message("QBDI_EXAMPLES:         ${QBDI_EXAMPLES}")
 if (NOT (QBDI_PLATFORM_WINDOWS OR QBDI_PLATFORM_IOS))
     message("QBDI_TOOLS_QBDIPRELOAD: ${QBDI_TOOLS_QBDIPRELOAD}")

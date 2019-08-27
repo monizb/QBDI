@@ -64,6 +64,7 @@ compile_and_test: &compile_and_test
     - cmake .. ${CMAKE_ARGS}
     - make -j2
     - ./test/QBDITest
+    - ./test/QBDIBenchmark
 
 docker_compile_and_test: &docker_compile_and_test
   services:
