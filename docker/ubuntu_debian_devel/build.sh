@@ -27,11 +27,11 @@ DISTRIB="${DOCKER_IMG##*/}"
 
 if [[ "$DISTRIB" = "ubuntu" ]]; then
     if [[ "${TAG}" = "18.10" || "${TAG:0:2}" -gt "18" ]]; then
-        CMAKE_ARGUMENT="${CMAKE_ARGUMENT} -DPACKAGE_LIBNCURSE6=TRUE"
+        CMAKE_ARGUMENT="${CMAKE_ARGUMENT} -DQBDI_PACKAGE_LIBNCURSE6=ON"
     fi
 elif [[ "$DISTRIB" = "debian" ]]; then
     if [[ "${TAG}" = "buster" || "${TAG:0:2}" = "10" ]]; then
-        CMAKE_ARGUMENT="${CMAKE_ARGUMENT} -DPACKAGE_LIBNCURSE6=TRUE"
+        CMAKE_ARGUMENT="${CMAKE_ARGUMENT} -DQBDI_PACKAGE_LIBNCURSE6=ON"
     fi
 fi
 

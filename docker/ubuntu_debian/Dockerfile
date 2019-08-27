@@ -7,7 +7,7 @@ ARG QBDI_ARCH="X86_64"
 ENV USER="docker" \
     HOME="/home/docker" \
     PREFIX="/usr" \
-    QBDI_PLATFOMR="LINUX"
+    QBDI_PLATFORM="LINUX"
 
 # Get latest package list, upgrade packages, install required packages
 # and cleanup to keep container as small as possible
@@ -77,7 +77,7 @@ RUN sudo chown -R $USER:$USER . && \
           -DQBDI_PLATFORM=$QBDI_PLATFORM \
           -DQBDI_ARCH=$QBDI_ARCH \
           -DCMAKE_INSTALL_PREFIX=$PREFIX \
-          -DTOOLS_PYQBDI=TRUE \
+          -DQBDI_TOOLS_PYQBDI=ON \
           $CMAKE_ARGUMENT \
           ../ && \
     make -j4 && \
