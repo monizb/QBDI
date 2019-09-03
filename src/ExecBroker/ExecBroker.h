@@ -48,6 +48,8 @@ public:
 
     ExecBroker(Assembly& assembly, VMInstanceRef vminstance = nullptr);
 
+    ExecBroker(const ExecBroker& previous, Assembly& assembly, VMInstanceRef vminstance);
+
     bool isInstrumented(rword addr) const { return instrumented.contains(addr);}
 
     void addInstrumentedRange(const Range<rword>& r);

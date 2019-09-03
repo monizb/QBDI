@@ -43,6 +43,16 @@ extern "C" {
  */
 QBDI_EXPORT void qbdi_initVM(VMInstanceRef* instance, const char* cpu, const char** mattrs);
 
+/*! Copy a VM
+ * The copy will keep the instrumented range, all callbacks and the current state.
+ * The cache of basic block isn't shared or copy between the two VM.
+ *
+ * @param[in] instance  The VM to copy
+ *
+ * @return  The copy of the instance of VM.
+ */
+QBDI_EXPORT VMInstanceRef qbdi_duplicateVM(const VMInstanceRef instance);
+
 /*! Destroy an instance of VM.
  *
  * @param[in] instance VM instance.
@@ -76,7 +86,7 @@ QBDI_EXPORT bool qbdi_addInstrumentedModule(VMInstanceRef instance, const char* 
  */
 QBDI_EXPORT bool qbdi_addInstrumentedModuleFromAddr(VMInstanceRef instance, rword addr);
 
-/*! Adds all the executable memory maps to the instrumented range set. 
+/*! Adds all the executable memory maps to the instrumented range set.
  *
  * @param[in] instance VM instance.
  *
@@ -218,8 +228,8 @@ QBDI_EXPORT void qbdi_setFPRState(VMInstanceRef instance, FPRState* fprState);
  */
 QBDI_EXPORT uint32_t qbdi_addMemAccessCB(VMInstanceRef instance, MemoryAccessType type, InstCallback cbk, void *data);
 
-/*! Add a virtual callback which is triggered for any memory access at a specific address 
- *  matching the access type. Virtual callbacks are called via callback forwarding by a 
+/*! Add a virtual callback which is triggered for any memory access at a specific address
+ *  matching the access type. Virtual callbacks are called via callback forwarding by a
  *  gate callback triggered on every memory access. This incurs a high performance cost.
  *
  * @param[in] instance  VM instance.
@@ -233,8 +243,8 @@ QBDI_EXPORT uint32_t qbdi_addMemAccessCB(VMInstanceRef instance, MemoryAccessTyp
  */
 QBDI_EXPORT uint32_t qbdi_addMemAddrCB(VMInstanceRef instance, rword address, MemoryAccessType type, InstCallback cbk, void *data);
 
-/*! Add a virtual callback which is triggered for any memory access in a specific address range 
- *  matching the access type. Virtual callbacks are called via callback forwarding by a 
+/*! Add a virtual callback which is triggered for any memory access in a specific address range
+ *  matching the access type. Virtual callbacks are called via callback forwarding by a
  *  gate callback triggered on every memory access. This incurs a high performance cost.
  *
  * @param[in] instance  VM instance.
@@ -329,7 +339,7 @@ QBDI_EXPORT bool qbdi_deleteInstrumentation(VMInstanceRef instance, uint32_t id)
 QBDI_EXPORT void qbdi_deleteAllInstrumentations(VMInstanceRef instance);
 
  /*! Obtain the analysis of an instruction metadata. Analysis results are cached in the VM.
- *  The validity of the returned pointer is only guaranteed until the end of the callback, else 
+ *  The validity of the returned pointer is only guaranteed until the end of the callback, else
  *  a deepcopy of the structure is required.
  *
  * @param[in] instance     VM instance.
@@ -339,11 +349,11 @@ QBDI_EXPORT void qbdi_deleteAllInstrumentations(VMInstanceRef instance);
  */
 QBDI_EXPORT const InstAnalysis* qbdi_getInstAnalysis(VMInstanceRef instance, AnalysisType type);
 
-/*! Add instrumentation rules to log memory access using inline instrumentation and 
+/*! Add instrumentation rules to log memory access using inline instrumentation and
  *  instruction shadows.
 
  * @param[in] instance  VM instance.
- * @param[in] type      Memory mode bitfield to activate the logging for: either QBDI_MEMORY_READ, 
+ * @param[in] type      Memory mode bitfield to activate the logging for: either QBDI_MEMORY_READ,
  *                      QBDI_MEMORY_WRITE or both (QBDI_MEMORY_READ_WRITE).
  *
  * @return True if inline memory logging is supported, False if not or in case of error.
@@ -378,6 +388,13 @@ QBDI_EXPORT MemoryAccess* qbdi_getBBMemoryAccess(VMInstanceRef instance, size_t*
  * @return True if basic block has been inserted in cache.
  */
 QBDI_EXPORT bool qbdi_precacheBasicBlock(VMInstanceRef instance, rword pc);
+
+/*! Get all current cached basic block
+ *
+ *
+ * @return a ordonned list of the range address of each basic block
+ */
+QBDI_EXPORT rword (*qbdi_getCachedBasicBlock(const VMInstanceRef instance, size_t* size))[2];
 
 /*! Clear a specific address range from the translation cache.
  *

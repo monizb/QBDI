@@ -130,12 +130,68 @@ Engine::Engine(const std::string& _cpu, const std::vector<std::string>& _mattrs,
     initFPRState();
 
     curExecBlock = nullptr;
+    is_running = false;
 }
 
 Engine::~Engine() {
     delete assembly;
     delete blockManager;
     delete execBroker;
+}
+
+Engine::Engine(const Engine& previous, VMInstanceRef vminstance) :
+        tripleName(previous.tripleName), cpu(previous.cpu), mattrs(previous.mattrs),
+        vminstance(vminstance), patchRules(previous.patchRules), instrRules(previous.instrRules),
+        instrRulesCounter(previous.instrRulesCounter), vmCallbacks(previous.vmCallbacks),
+        vmCallbacksCounter(previous.vmCallbacksCounter), curExecBlock(nullptr), is_running(false) {
+
+    std::string          error;
+    std::string          featuresStr;
+    const llvm::Target*  processTarget;
+
+    if (!mattrs.empty()) {
+        llvm::SubtargetFeatures features;
+        for (unsigned i = 0; i != mattrs.size(); ++i) {
+            features.AddFeature(mattrs[i]);
+        }
+        featuresStr = features.getString();
+    }
+
+    // lookup target
+    llvm::Triple processTriple(tripleName);
+    processTarget = llvm::TargetRegistry::lookupTarget(tripleName, error);
+
+    // Allocate all LLVM classes
+    MRI = std::unique_ptr<llvm::MCRegisterInfo>(
+        processTarget->createMCRegInfo(tripleName)
+    );
+    MAI = std::unique_ptr<llvm::MCAsmInfo>(
+        processTarget->createMCAsmInfo(*MRI, tripleName)
+    );
+    MOFI = std::unique_ptr<llvm::MCObjectFileInfo>(new llvm::MCObjectFileInfo());
+    MCTX = std::unique_ptr<llvm::MCContext>(new llvm::MCContext(MAI.get(), MRI.get(), MOFI.get()));
+    MOFI->InitMCObjectFileInfo(processTriple, false, *MCTX);
+    MCII = std::unique_ptr<llvm::MCInstrInfo>(processTarget->createMCInstrInfo());
+    MSTI = std::unique_ptr<llvm::MCSubtargetInfo>(
+      processTarget->createMCSubtargetInfo(tripleName, cpu, featuresStr)
+    );
+    auto MAB = std::unique_ptr<llvm::MCAsmBackend>(
+        processTarget->createMCAsmBackend(*MSTI, *MRI, llvm::MCTargetOptions())
+    );
+    MCE = std::unique_ptr<llvm::MCCodeEmitter>(
+       processTarget->createMCCodeEmitter(*MCII, *MRI, *MCTX)
+    );
+
+    // Allocate QBDI classes
+    assembly = new Assembly(*MCTX, std::move(MAB), *MCII, *processTarget, *MSTI);
+    blockManager = new ExecBlockManager(*MCII, *MRI, *assembly, vminstance);
+    execBroker = new ExecBroker(*previous.execBroker, *assembly, vminstance);
+
+    // Copy state of the previous VM
+    gprState = std::unique_ptr<GPRState>(new GPRState(*(previous.getGPRState())));
+    fprState = std::unique_ptr<FPRState>(new FPRState(*(previous.getFPRState())));
+    curGPRState = gprState.get();
+    curFPRState = fprState.get();
 }
 
 void Engine::initGPRState() {
@@ -312,6 +368,9 @@ bool Engine::precacheBasicBlock(rword pc) {
     return true;
 }
 
+std::vector<std::pair<rword, rword>> Engine::getCachedBasicBlock() const {
+    return blockManager->getCachedBasicBlock();
+}
 
 bool Engine::run(rword start, rword stop) {
     rword         currentPC = start;
@@ -321,8 +380,16 @@ bool Engine::run(rword start, rword stop) {
 
     // Start address is out of range
     if (!execBroker->isInstrumented(start)) {
+        LogWarning("Engine::run", "start address isn't instrumented, cannot run()");
         return false;
     }
+
+    if (is_running) {
+        LogError("Engine::run", "Engine is running, run() cannot be call before the first call finish");
+        return false;
+    }
+
+    is_running = true;
 
     // Execute basic block per basic block
     do {
@@ -384,11 +451,7 @@ bool Engine::run(rword start, rword stop) {
                 case BREAK_TO_VM:
                     break;
                 case STOP:
-                    *gprState = *curGPRState;
-                    *fprState = *curFPRState;
-                    curGPRState = gprState.get();
-                    curFPRState = fprState.get();
-                    return hasRan;
+                    goto stop;
             }
 
             // Signal events
@@ -403,11 +466,14 @@ bool Engine::run(rword start, rword stop) {
         LogDebug("Engine::run", "Next address to execute is 0x%" PRIRWORD, currentPC);
     } while(currentPC != stop);
 
+stop:
     // Copy final context
     *gprState = *curGPRState;
     *fprState = *curFPRState;
     curGPRState = gprState.get();
     curFPRState = fprState.get();
+    is_running = false;
+    curExecBlock = nullptr;
 
     return hasRan;
 }

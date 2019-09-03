@@ -43,6 +43,10 @@ void qbdi_initVM(VMInstanceRef* instance, const char* cpu, const char** mattrs) 
     *instance = static_cast<VMInstanceRef>(new VM(cpuStr, mattrsStr));
 }
 
+VMInstanceRef qbdi_duplicateVM(const VMInstanceRef instance) {
+    RequireAction("VM_C::ducplicateVM", instance, return nullptr);
+    return static_cast<VMInstanceRef>(new VM(*static_cast<VM* const>(instance)));
+}
 
 void qbdi_terminateVM(VMInstanceRef instance) {
     RequireAction("VM_C::terminateVM", instance, return);
@@ -232,6 +236,23 @@ MemoryAccess* qbdi_getBBMemoryAccess(VMInstanceRef instance, size_t* size) {
 bool qbdi_precacheBasicBlock(VMInstanceRef instance, rword pc) {
     RequireAction("VM_C::precacheBasicBlock", instance, return false);
     return static_cast<VM*>(instance)->precacheBasicBlock(pc);
+}
+
+rword (*qbdi_getCachedBasicBlock(const VMInstanceRef instance, size_t* size))[2] {
+    RequireAction("VM_C::getCachedBasicBlock", instance, return nullptr);
+    RequireAction("VM_C::getCachedBasicBlock", size, return nullptr);
+
+    std::vector<std::pair<rword, rword>> cachedBB = static_cast<const VM*>(instance)->getCachedBasicBlock();
+
+    rword (*res)[2] = ( rword(*)[2] ) malloc(sizeof(rword) * 2 * cachedBB.size());
+
+    *size = cachedBB.size();
+    for (size_t i = 0; i < *size; i++) {
+        res[i][0] = cachedBB[i].first;
+        res[i][1] = cachedBB[i].second;
+    }
+
+    return res;
 }
 
 void qbdi_clearAllCache(VMInstanceRef instance) {

@@ -91,12 +91,18 @@ VMAction stopCallback(VMInstanceRef vm, GPRState* gprState, FPRState* fprState, 
 VM::VM(const std::string& cpu, const std::vector<std::string>& mattrs) :
     memoryLoggingLevel(0), memCBID(0), memReadGateCBID(VMError::INVALID_EVENTID), memWriteGateCBID(VMError::INVALID_EVENTID) {
     engine = new Engine(cpu, mattrs, this);
-    memCBInfos = new std::vector<std::pair<uint32_t, MemCBInfo>>;
 }
 
 VM::~VM() {
-    delete memCBInfos;
     delete engine;
+}
+
+VM::VM(const VM& previous):
+        memoryLoggingLevel(previous.memoryLoggingLevel), memCBInfos(previous.memCBInfos),
+        memCBID(previous.memoryLoggingLevel), memReadGateCBID(previous.memReadGateCBID),
+        memWriteGateCBID(previous.memWriteGateCBID) {
+    engine = new Engine(*previous.engine, this);
+    LogError("VM::cpy", "Copy Constructor");
 }
 
 GPRState* VM::getGPRState() const {
@@ -288,14 +294,14 @@ uint32_t VM::addMemRangeCB(rword start, rword end, MemoryAccessType type, InstCa
     RequireAction("VM::addMemRangeCB", type & MEMORY_READ_WRITE, return VMError::INVALID_EVENTID);
     RequireAction("VM::addMemRangeCB", cbk != nullptr, return VMError::INVALID_EVENTID);
     if((type == MEMORY_READ) && memReadGateCBID == VMError::INVALID_EVENTID) {
-        memReadGateCBID = addMemAccessCB(MEMORY_READ, memReadGate, memCBInfos);
+        memReadGateCBID = addMemAccessCB(MEMORY_READ, memReadGate, &memCBInfos);
     }
     if((type & MEMORY_WRITE) && memWriteGateCBID == VMError::INVALID_EVENTID) {
-        memWriteGateCBID = addMemAccessCB(MEMORY_READ_WRITE, memWriteGate, memCBInfos);
+        memWriteGateCBID = addMemAccessCB(MEMORY_READ_WRITE, memWriteGate, &memCBInfos);
     }
     uint32_t id = memCBID++;
     RequireAction("VM::addMemRangeCB", id < EVENTID_VIRTCB_MASK, return VMError::INVALID_EVENTID);
-    memCBInfos->push_back(std::make_pair(id, MemCBInfo {type, Range<rword>(start, end), cbk, data}));
+    memCBInfos.push_back(std::make_pair(id, MemCBInfo {type, Range<rword>(start, end), cbk, data}));
     return id | EVENTID_VIRTCB_MASK;
 }
 
@@ -308,9 +314,9 @@ uint32_t VM::addVMEventCB(VMEvent mask, VMCallback cbk, void *data) {
 bool VM::deleteInstrumentation(uint32_t id) {
     if(id & EVENTID_VIRTCB_MASK) {
         id &= ~EVENTID_VIRTCB_MASK;
-        for(size_t i = 0; i < memCBInfos->size(); i++) {
-            if((*memCBInfos)[i].first == id) {
-                memCBInfos->erase(memCBInfos->begin() + i);
+        for(size_t i = 0; i < memCBInfos.size(); i++) {
+            if(memCBInfos[i].first == id) {
+                memCBInfos.erase(memCBInfos.begin() + i);
                 return true;
             }
         }
@@ -325,7 +331,7 @@ void VM::deleteAllInstrumentations() {
     engine->deleteAllInstrumentations();
     memReadGateCBID = VMError::INVALID_EVENTID;
     memWriteGateCBID = VMError::INVALID_EVENTID;
-    memCBInfos->clear();
+    memCBInfos.clear();
     memoryLoggingLevel = 0;
 }
 
@@ -494,6 +500,10 @@ std::vector<MemoryAccess> VM::getBBMemoryAccess() const {
 
 bool VM::precacheBasicBlock(rword pc) {
     return engine->precacheBasicBlock(pc);
+}
+
+std::vector<std::pair<rword, rword>> VM::getCachedBasicBlock() const {
+    return engine->getCachedBasicBlock();
 }
 
 void VM::clearAllCache() {

@@ -34,27 +34,33 @@ namespace QBDI {
 class RelocatableInst;
 
 struct InstLoc {
-    uint16_t blockIdx;
-    uint16_t instID;
+    uint16_t blockIdx; /*!< ExecBlock index in the region where the instruction is located */
+    uint16_t instID;   /*!< Instruction index in blocks[blockIdx] */
 };
 
 struct SeqLoc {
-    uint16_t blockIdx;
-    uint16_t seqID;
-    rword bbStart;
-    rword bbEnd;
-    rword seqStart;
-    rword seqEnd;
+    uint16_t blockIdx; /*!< ExecBlock index in the region where the sequence is located */
+    uint16_t seqID;    /*!< Sequence index in blocks[blockIdx] */
+    rword bbStart;     /*!< Start address of the basic block where the sequence is located
+                        *   WARNING : This address can be in the middle of a basic block if
+                        *             the first execution of the basic block doesn't begin
+                        *             at the real start address of the basic block.
+                        */
+    rword bbEnd;       /*!< End address of the basic block where the sequence is located */
+    rword seqStart;    /*!< Start address of the sequence */
+    rword seqEnd;      /*!< End address of the sequence */
 };
 
 struct ExecRegion {
-    Range<rword>                    covered;
-    unsigned                        translated; 
-    unsigned                        available;
-    std::vector<ExecBlock*>         blocks;
-    std::map<rword, SeqLoc>         sequenceCache;
-    std::map<rword, InstLoc>        instCache;
-    std::map<rword, InstAnalysis*>  analysisCache;
+    Range<rword>                    covered;            /*!< Address range covered by the region
+                                                             This range can change during the execution and can overlapse
+                                                             in some case with others regions */
+    unsigned                        translated;         /*!< Number of original instruction bytes written in the region */
+    unsigned                        available;          /*!< Number of byte available in the region (used to determined if the region can grow) */
+    std::vector<ExecBlock*>         blocks;             /*!< The ExecBlock associated to the region */
+    std::map<rword, SeqLoc>         sequenceCache;      /*!< All the sequence available in the region (key = seqStart) */
+    std::map<rword, InstLoc>        instCache;          /*!< All instruction avaiable in the region */
+    std::map<rword, InstAnalysis*>  analysisCache;      /*!< Cache of InstAnalysis for instruction in the region */
 };
 
 class ExecBlockManager {
@@ -107,6 +113,8 @@ public:
     void clearCache(Range<rword> range);
 
     void clearCache(RangeSet<rword> rangeSet);
+
+    std::vector<std::pair<rword, rword>> getCachedBasicBlock() const;
 };
 
 }

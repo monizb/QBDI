@@ -684,4 +684,21 @@ void ExecBlockManager::clearCache() {
     }
 }
 
+std::vector<std::pair<rword, rword>> ExecBlockManager::getCachedBasicBlock() const {
+    std::vector<std::pair<rword, rword>> res;
+    rword lastBBaddr = 0;
+
+    // region can overlaps, but is ordered by start address.
+    for (const ExecRegion& reg : regions) {
+        for(const std::pair<rword, SeqLoc>& it : reg.sequenceCache) {
+            if (lastBBaddr <= it.second.bbStart) {
+                res.push_back(std::pair<rword, rword>(it.second.bbStart, it.second.bbEnd));
+                lastBBaddr = it.second.bbEnd;
+            }
+        }
+    }
+
+    return res;
+}
+
 }
