@@ -270,7 +270,7 @@ void catchEntrypoint(int argc, char **argv) {
 
     if (DEFAULT_HANDLER && (status == QBDIPRELOAD_NOT_HANDLED)) {
         VMInstanceRef vm;
-        qbdi_initVM(&vm, NULL, NULL);
+        qbdi_initVM(&vm, NULL, NULL, 0);
         qbdi_instrumentAllExecutableMaps(vm);
 
         // Skip system library (to avoid conflicts)
@@ -343,7 +343,7 @@ kern_return_t redirectExec(
 
         // Allocating fake stack
         void* newStack = NULL;
-        kr = mach_vm_map(task, (mach_vm_address_t*) &newStack, STACK_SIZE, 0, VM_FLAGS_ANYWHERE, 
+        kr = mach_vm_map(task, (mach_vm_address_t*) &newStack, STACK_SIZE, 0, VM_FLAGS_ANYWHERE,
                          MEMORY_OBJECT_NULL, 0, false, VM_PROT_READ|VM_PROT_WRITE, VM_PROT_ALL, VM_INHERIT_COPY);
         if(kr != KERN_SUCCESS) {
             fprintf(stderr, "Failed to allocate fake stack: %s\n", mach_error_string(kr));
@@ -402,7 +402,7 @@ DYLD_INTERPOSE(intercept__exit, _exit)
 
 int qbdipreload_hook_init() {
     rword entrypoint = getEntrypointAddress();
-    
+
     int status = qbdipreload_on_start((void*)entrypoint);
     if (status == QBDIPRELOAD_NOT_HANDLED) {
         status = qbdipreload_hook_main((void*)entrypoint);

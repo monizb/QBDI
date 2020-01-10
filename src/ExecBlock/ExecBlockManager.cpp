@@ -123,7 +123,7 @@ const SeqLoc* ExecBlockManager::getSeqLoc(rword address) const {
     return nullptr;
 }
 
-void ExecBlockManager::writeBasicBlock(const std::vector<Patch>& basicBlock) {
+void ExecBlockManager::writeBasicBlock(const std::vector<Patch>& basicBlock, Options options) {
     unsigned translated = 0;
     unsigned translation = 0;
     size_t patchIdx = 0, patchEnd = basicBlock.size();
@@ -165,7 +165,7 @@ void ExecBlockManager::writeBasicBlock(const std::vector<Patch>& basicBlock) {
             if(patchIdx == 0) seqType = static_cast<SeqType>(seqType | SeqType::Entry);
             if(patchEnd == basicBlock.size()) seqType = static_cast<SeqType>(seqType | SeqType::Exit);
             // Write sequence
-            SeqWriteResult res = region.blocks[i]->writeSequence(basicBlock.begin() + patchIdx, basicBlock.begin() + patchEnd, seqType);
+            SeqWriteResult res = region.blocks[i]->writeSequence(basicBlock.begin() + patchIdx, basicBlock.begin() + patchEnd, seqType, options);
             // Successful write
             if(res.seqID != EXEC_BLOCK_FULL) {
                 // Saving sequence in the sequence cache

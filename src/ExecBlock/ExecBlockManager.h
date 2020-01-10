@@ -94,7 +94,7 @@ public:
 
     const SeqLoc* getSeqLoc(rword address) const;
 
-    void writeBasicBlock(const std::vector<Patch>& basicBlock);
+    void writeBasicBlock(const std::vector<Patch>& basicBlock, Options options = Options::NO_OPT);
 
     const InstAnalysis* analyzeInstMetadata(const InstMetadata* instMetadata, AnalysisType type);
 

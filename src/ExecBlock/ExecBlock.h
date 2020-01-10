@@ -28,6 +28,7 @@
 
 #include "Callback.h"
 #include "Context.h"
+#include "Options.h"
 #include "Patch/Types.h"
 #include "Utility/memory_ostream.h"
 #include "Utility/Assembly.h"
@@ -152,10 +153,14 @@ public:
      * @param seqStart [in] Iterator to the start of a list of patches.
      * @param seqEnd   [in] Iterator to the end of a list of patches.
      * @param seqType  [in] Type of the sequence.
+     * @param options  [in] the current options of the VM
      *
      * @return A structure detailling the write operation result.
      */
-    SeqWriteResult writeSequence(std::vector<Patch>::const_iterator seqStart, std::vector<Patch>::const_iterator seqEnd, SeqType seqType);
+    SeqWriteResult writeSequence(std::vector<Patch>::const_iterator seqStart,
+                                 std::vector<Patch>::const_iterator seqEnd,
+                                 SeqType seqType,
+                                 Options options=Options::NO_OPT);
 
     /*! Split an existing sequence at instruction instID to create a new sequence.
      *

@@ -51,8 +51,9 @@
 
 namespace QBDI {
 
-Engine::Engine(const std::string& _cpu, const std::vector<std::string>& _mattrs, VMInstanceRef vminstance)
-    : cpu(_cpu), mattrs(_mattrs), vminstance(vminstance), instrRulesCounter(0), vmCallbacksCounter(0) {
+Engine::Engine(const std::string& _cpu, const std::vector<std::string>& _mattrs, Options opts,
+        VMInstanceRef vminstance) : cpu(_cpu), mattrs(_mattrs), vminstance(vminstance),
+    instrRulesCounter(0), vmCallbacksCounter(0), options(opts) {
 
     std::string          error;
     std::string          featuresStr;
@@ -167,6 +168,13 @@ void Engine::setGPRState(GPRState* gprState) {
 void Engine::setFPRState(FPRState* fprState) {
     RequireAction("Engine::setFPRState", fprState, return);
     *(this->curFPRState) = *fprState;
+}
+
+void Engine::setOptions(Options options) {
+    if (options != this->options) {
+        clearAllCache();
+        this->options = options;
+    }
 }
 
 bool Engine::isPreInst() const {
@@ -300,7 +308,7 @@ void Engine::handleNewBasicBlock(rword pc) {
     // instrument it
     instrument(basicBlock);
     // Write it in the cache
-    blockManager->writeBasicBlock(basicBlock);
+    blockManager->writeBasicBlock(basicBlock, options);
 }
 
 

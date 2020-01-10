@@ -29,6 +29,7 @@
 #include "State.h"
 #include "InstAnalysis.h"
 #include "Range.h"
+#include "Options.h"
 
 namespace QBDI {
 
@@ -53,7 +54,7 @@ class QBDI_EXPORT VM {
      * @param[in] cpu    The name of the CPU
      * @param[in] mattrs A list of additional attributes
      */
-    VM(const std::string& cpu = "", const std::vector<std::string>& mattrs = {});
+    VM(const std::string& cpu = "", const std::vector<std::string>& mattrs = {}, Options opts = Options::NO_OPT);
 
     ~VM();
 
@@ -75,11 +76,19 @@ class QBDI_EXPORT VM {
      */
     void        setGPRState(GPRState* gprState);
 
-    /*! Set the GPR state
+    /*! Set the FPR state
      *
      * @param[in] fprState A structure containing the FPR state.
      */
     void        setFPRState(FPRState* fprState);
+
+    /*! Set the Options of the VM
+     *
+     * @param[in] options  the new options of the VM
+     *
+     * If the new options is different that the current ones, the cache will be clear.
+     */
+    void        setOptions(Options options);
 
     /*! Add an address range to the set of instrumented address ranges.
      *

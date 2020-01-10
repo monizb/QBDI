@@ -88,9 +88,9 @@ VMAction stopCallback(VMInstanceRef vm, GPRState* gprState, FPRState* fprState, 
     return VMAction::STOP;
 }
 
-VM::VM(const std::string& cpu, const std::vector<std::string>& mattrs) :
+VM::VM(const std::string& cpu, const std::vector<std::string>& mattrs, Options opts) :
     memoryLoggingLevel(0), memCBID(0), memReadGateCBID(VMError::INVALID_EVENTID), memWriteGateCBID(VMError::INVALID_EVENTID) {
-    engine = new Engine(cpu, mattrs, this);
+    engine = new Engine(cpu, mattrs, opts, this);
     memCBInfos = new std::vector<std::pair<uint32_t, MemCBInfo>>;
 }
 
@@ -116,6 +116,10 @@ void VM::setGPRState(GPRState* gprState) {
 void VM::setFPRState(FPRState* fprState) {
     RequireAction("VM::setFPRState", fprState != nullptr, return);
     engine->setFPRState(fprState);
+}
+
+void VM::setOptions(Options options) {
+    engine->setOptions(options);
 }
 
 void VM::addInstrumentedRange(rword start, rword end) {

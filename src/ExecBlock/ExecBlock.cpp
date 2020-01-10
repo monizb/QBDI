@@ -219,7 +219,8 @@ VMAction ExecBlock::execute() {
     return CONTINUE;
 }
 
-SeqWriteResult ExecBlock::writeSequence(std::vector<Patch>::const_iterator seqIt, std::vector<Patch>::const_iterator seqEnd, SeqType seqType) {
+SeqWriteResult ExecBlock::writeSequence(std::vector<Patch>::const_iterator seqIt, std::vector<Patch>::const_iterator seqEnd,
+        SeqType seqType, Options options) {
     rword startOffset = (rword)codeStream->current_pos();
     uint16_t startInstID = getNextInstID();
     uint16_t seqID = getNextSeqID();
@@ -302,6 +303,15 @@ SeqWriteResult ExecBlock::writeSequence(std::vector<Patch>::const_iterator seqIt
     RelocatableInst::SharedPtrVec jmpEpilogue = JmpEpilogue();
     for(RelocatableInst::SharedPtr &inst : jmpEpilogue) {
         assembly.writeInstruction(inst->reloc(this), codeStream);
+    }
+    // change the flag of the basicblock
+    if (options & Options::DISABLE_FPR) {
+        if (executeFlags != 0) {
+            LogDebug("ExecBlock::writeBasicBlock", "Options.DISABLE_FPR specified. Change executeFlags from (0x%x) to 0.", executeFlags);
+            executeFlags = 0;
+        }
+    } else if (options & Options::DISABLE_OPTIONAL_FPR) {
+        executeFlags = defaultExecuteFlags;
     }
     // Register sequence
     uint16_t endInstID = getNextInstID() - 1;
