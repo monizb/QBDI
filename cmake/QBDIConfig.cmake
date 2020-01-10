@@ -5,6 +5,20 @@ endif()
 set(__add_qbdi_config ON)
 
 # ========================
+# CMAKE build type
+# ========================
+
+set(DEFAULT_BUILD_TYPE Release)
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
+  set(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}" CACHE STRING "Used default build type (${DEFAULT_BUILD_TYPE})." FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
+endif()
+
+
+
+# ========================
 # QBDI Version
 # ========================
 set(QBDI_VERSION_MAJOR 0)
