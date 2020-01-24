@@ -62,8 +62,12 @@ uint8_t getExecBlockFlags(const llvm::MCInst *inst, llvm::MCInstrInfo* MCII, llv
     }
 
     // detect implicit FPU instruction
-    if ((desc.TSFlags & llvm::X86II::FPTypeMask) != 0)
-        flags |= ExecBlockFlags::needFPU;
+    if ((desc.TSFlags & llvm::X86II::FPTypeMask) != 0) {
+        if ((desc.TSFlags & llvm::X86II::FPTypeMask) != llvm::X86II::SpecialFP or
+                ((not desc.isReturn()) and (not desc.isCall()))) {
+            flags |= ExecBlockFlags::needFPU;
+        }
+    }
 
     return flags;
 }
