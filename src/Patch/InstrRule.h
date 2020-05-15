@@ -39,18 +39,32 @@
 
 namespace QBDI {
 
+typedef enum : uint8_t {
+    FIRSTPASS = 0, // the instrumentation rule in the first pass will be near the Patched instruction
+    MIDDLEPASS,
+    LASTPASS, // the instrumentation rule in the last pass will be the first or the last instruction of the Patch
+} InstPass;
+
+
 /*! An instrumentation rule written in PatchDSL.
 */
 class InstrRule {
 
+protected:
+
+    InstPass pass;
+
 public:
+
+    InstrRule(InstPass pass) : pass(pass) {}
+    virtual ~InstrRule() = default;
 
     using SharedPtr    = std::shared_ptr<InstrRule>;
     using SharedPtrVec = std::vector<std::shared_ptr<InstrRule>>;
 
     virtual operator std::shared_ptr<InstrRule>() =0;
 
-    virtual InstPosition getPosition() { return PREINST; }
+    InstPass getPass() { return pass; }
 
     virtual RangeSet<rword> affectedRange() const =0;
 
@@ -104,10 +118,10 @@ public:
      *                         a break to host (in the case of a callback for example).
     */
     InstrRuleBasic(PatchCondition::SharedPtr condition, PatchGenerator::SharedPtrVec patchGen,
-                   InstPosition position, bool breakToHost) : condition(condition), patchGen(patchGen),
-        position(position), breakToHost(breakToHost) {}
+                   InstPosition position, bool breakToHost, InstPass pass) : InstrRule(pass),
+        condition(condition), patchGen(patchGen), position(position), breakToHost(breakToHost) {}
 
-    virtual InstPosition getPosition() override { return position; }
+    ~InstrRuleBasic() override = default;
 
     RangeSet<rword> affectedRange() const override {
         return condition->affectedRange();
@@ -161,10 +175,10 @@ public:
      *                             a break to host (in the case of a callback for example).
     */
     InstrRuleDynamic(PatchCondition::SharedPtr condition, PatchGenMethod patchGenMethod,
-                     InstPosition position, bool breakToHost) : condition(condition),
-        patchGenMethod(patchGenMethod), position(position), breakToHost(breakToHost) {}
+                     InstPosition position, bool breakToHost, InstPass pass) : InstrRule(pass),
+        condition(condition), patchGenMethod(patchGenMethod), position(position), breakToHost(breakToHost) {}
 
-    virtual InstPosition getPosition() override { return position; }
+    ~InstrRuleDynamic() override = default;
 
     RangeSet<rword> affectedRange() const override {
         return condition->affectedRange();
@@ -202,8 +216,10 @@ class InstrRuleUser : public InstrRule {
 public:
 
     InstrRuleUser(InstrumentCallback cbk, AnalysisType analysisType,
-                     void* cbk_data, VMInstanceRef vm, RangeSet<rword> range) :
-        cbk(cbk), analysisType(analysisType), cbk_data(cbk_data), vm(vm), range(range) {}
+                     void* cbk_data, VMInstanceRef vm, RangeSet<rword> range, InstPass pass) :
+        InstrRule(pass), cbk(cbk), analysisType(analysisType), cbk_data(cbk_data), vm(vm), range(range) {}
+
+    ~InstrRuleUser() override = default;
 
     operator std::shared_ptr<InstrRule>() override {
         return std::shared_ptr<InstrRule>(new InstrRuleUser(*static_cast<InstrRuleUser*>(this)));
