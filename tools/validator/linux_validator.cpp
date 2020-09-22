@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <dlfcn.h>
 #include <signal.h>
 #include <sys/mman.h>
@@ -76,12 +77,14 @@ int QBDI::qbdipreload_on_start(void *main) {
     setvbuf(stdin, NULL, _IONBF, 0);
     setvbuf(stdout, NULL, _IONBF, 0);
     setvbuf(stderr, NULL, _IONBF, 0);
+    signal(SIGWINCH, SIG_IGN);
 
     instrumented = fork();
     if(instrumented == 0) {
         INSTRUMENTED = true;
         return QBDIPRELOAD_NOT_HANDLED;
     }
+
     debugged = fork();
     if(debugged == 0) {
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
