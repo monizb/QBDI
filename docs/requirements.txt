@@ -1,1 +1,5 @@
-requirements.readthedocs.txt
+Sphinx==1.6.7
+breathe==4.7.3
+-e git+https://github.com/lunant/sphinxcontrib-autojs.git#egg=sphinxcontrib-autojs
+sphinx_rtd_theme
+setuptools>=78.1.1 # not directly required, pinned by Snyk to avoid a vulnerability
